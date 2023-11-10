@@ -1,6 +1,7 @@
 package lenicorp.eecole.typemodule.controller.services;
 
 import lenicorp.eecole.modulelog.controller.service.ILogService;
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lenicorp.eecole.sharedmodule.enums.PersStatus;
 import lenicorp.eecole.sharedmodule.exceptions.AppException;
 import lenicorp.eecole.sharedmodule.utilities.ObjectCopier;
@@ -20,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -73,6 +71,28 @@ public class TypeService implements ITypeService
         Type oldType = typeCopier.copy(loadedType);
         loadedType.setStatus(PersStatus.ACTIVE);
         logger.logg(TypeActions.RESTORE_TYPE, oldType, loadedType, TypeTables.TYPE, null);
+    }
+
+    @Override
+    public List<SelectOption> getTypeGroupOptions() {
+        List<SelectOption> options = Arrays.stream(TypeGroup.values()).map(tg->new SelectOption(tg.getGroupName(), tg.name())).collect(Collectors.toList());
+        options.add(0, new SelectOption("", ""));
+        return options;
+    }
+
+    @Override
+    public boolean existsByName(String name, String uniqueCode)
+    {
+        if(name == null || name.equals("")) return false;
+        if(uniqueCode == null || uniqueCode.equals("")) return typeRepo.existsByName(name);
+        return typeRepo.existsByName(name, uniqueCode);
+    }
+
+    @Override
+    public boolean typeGroupIsValid(String typeGroup)
+    {
+        if(typeGroup == null || typeGroup.trim().equals("")) return false;
+        return TypeGroup.hasValue(typeGroup);
     }
 
     @Override @Transactional
@@ -181,15 +201,14 @@ public class TypeService implements ITypeService
     }
 
     @Override
-    public Page<Type> searchPageOfTypes(String key, String typeGroup, int pageNum, int pageSize)
+    public Page<Type> searchPageOfTypes(String key, List<String> typeGroups, int pageNum, int pageSize)
     {
-        if("".equals(key)) return typeRepo.searchPageOfTypes(PersStatus.ACTIVE, PageRequest.of(pageNum, pageSize));
-        Set<TypeGroup> typeGroups =  Arrays.asList(TypeGroup.values()).stream().filter(
-                tg -> StringUtils.containsIgnoreCase(tg.getGroupCode(), key) ||
-                StringUtils.containsIgnoreCase(tg.getGroupName(), key) ||
-                StringUtils.containsIgnoreCase(tg.name(), key)).collect(Collectors.toSet());
-        if(typeGroups.size() == 0) return typeRepo.searchPageOfTypes(key, PersStatus.ACTIVE, PageRequest.of(pageNum, pageSize));
-        return typeRepo.searchPageOfTypes(key, typeGroups, PersStatus.ACTIVE, PageRequest.of(pageNum, pageSize));
+        //if("".equals(key)) return typeRepo.searchPageOfTypes(PersStatus.ACTIVE, PageRequest.of(pageNum, pageSize));
+        List<TypeGroup> baseTypeGroups = typeGroups == null || typeGroups.isEmpty() ?
+                Arrays.stream(TypeGroup.values()).toList()
+                : typeGroups.stream().filter(tg-> TypeGroup.hasValue(tg)).map(tg->TypeGroup.valueOf(tg)).collect(Collectors.toList());
+
+        return typeRepo.searchPageOfTypes(key, baseTypeGroups, PersStatus.ACTIVE, PageRequest.of(pageNum, pageSize));
     }
 
     @Override

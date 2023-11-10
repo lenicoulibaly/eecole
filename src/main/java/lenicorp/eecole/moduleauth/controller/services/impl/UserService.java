@@ -307,7 +307,7 @@ public class UserService implements IUserService
     }
 
     @Override
-    public Page<ListUserDTO> searchUsers(String key, List<String> userStaCodes, Pageable pageable)
+    public Page<ReadUserDTO> searchUsers(String key, List<String> userStaCodes, Pageable pageable)
     {
         userStaCodes = userStaCodes == null || userStaCodes.isEmpty() ? staRepo.getStaCodesByTypeStatut(TypeStatut.USER) : userStaCodes;
         key = key == null ? "" : StringUtils.stripAccentsToUpperCase(key);
@@ -357,5 +357,15 @@ public class UserService implements IUserService
         user.setStatus(this.getUserStatus(userId));
         user.setCurrentFnc(functionService.getActiveCurrentFunction(userId));
         return user;
+    }
+
+    @Override
+    public boolean existsByEmail(String email, Long userId) {
+        return userRepo.alreadyExistsByEmail(email, userId);
+    }
+
+    @Override
+    public boolean existsByTel(String tel, Long userId) {
+        return userRepo.alreadyExistsByTel(tel, userId);
     }
 }

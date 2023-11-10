@@ -1,5 +1,6 @@
 package lenicorp.eecole.sharedmodule.exceptions;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lenicorp.eecole.modulelog.controller.service.ILogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class AppExceptionHandler
     }
 
     @ExceptionHandler()
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public List<String> handleAuthException(AuthenticationException exception)
     {
         List<String> errorMessages = new ArrayList<>();
@@ -57,6 +58,13 @@ public class AppExceptionHandler
                 exception instanceof InsufficientAuthenticationException ? exception.getMessage() : "Username ou mot de passe incorrect";
         errorMessages.add(errMsg);
         return errorMessages;
+    }
+
+    @ExceptionHandler()
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleJwtExpirationException(ExpiredJwtException exception)
+    {
+        return "EXPIRED_TOKEN";
     }
 
     @ExceptionHandler()

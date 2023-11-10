@@ -7,6 +7,7 @@ import lenicorp.eecole.moduleauth.controller.services.spec.IPrivilegeService;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.CreatePrivilegeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.PrvByTypeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO;
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,8 +32,8 @@ public class PrvResource
     }
 
     @GetMapping(path = "/search")
-    public Page<ReadPrvDTO> searchPrv(@RequestParam(defaultValue = "") String key, @RequestParam(defaultValue = "0") int num, @RequestParam(defaultValue = "10000") int size){
-        return prvService.searchPrivileges(key, PageRequest.of(num, size));
+    public Page<ReadPrvDTO> searchPrv(@RequestParam(defaultValue = "") String key, @RequestParam List<String> typePrvUniqueCodes, @RequestParam(defaultValue = "0") int num, @RequestParam(defaultValue = "10000") int size){
+        return prvService.searchPrivileges(key, typePrvUniqueCodes, PageRequest.of(num, size));
     }
 
     @GetMapping(path = "/grouped-by-type")
@@ -45,19 +46,14 @@ public class PrvResource
         return prvRepo.existsByName(name);
     }
 
-    @GetMapping(path = "/existsByName/{name}/{prvId}")
-    public boolean existsByName(@PathVariable String name, @PathVariable Long prvId){
-        return prvRepo.existsByName(name, prvId);
+    @GetMapping(path = "/existsByName/{name}/{privilegeCode}")
+    public boolean existsByName(@PathVariable String name, @PathVariable String privilegeCode){
+        return prvRepo.existsByName(name, privilegeCode);
     }
 
-    @GetMapping(path = "/existsByCode/{code}")
-    public boolean existsByCode(@PathVariable String code) throws UnknownHostException, IllegalAccessException {
-        return prvRepo.existsByCode(code);
-    }
-
-    @GetMapping(path = "/existsByCode/{code}/{prvId}")
-    public boolean existsByCode(@PathVariable String code, @PathVariable Long prvId) throws UnknownHostException, IllegalAccessException {
-        return prvRepo.existsByCode(code, prvId);
+    @GetMapping(path = "/existsByCode/{privilegeCode}")
+    public boolean existsByCode(@PathVariable String privilegeCode) throws UnknownHostException, IllegalAccessException {
+        return prvRepo.existsByCode(privilegeCode);
     }
 
     @GetMapping(path = "/privilegeCodes-for-roleCodes")
@@ -73,5 +69,10 @@ public class PrvResource
     @GetMapping(path = "/privilege-belong-to-any-role")
     public boolean prvBelongToAnyRole(@RequestParam Set<String> roleCodes, @RequestParam String prvCode) throws UnknownHostException, IllegalAccessException {
         return ptrRepo.prvBelongToAnyRole(prvCode, roleCodes);
+    }
+
+    @GetMapping(path = "/types")
+    public List<SelectOption> getPrvTypesOptions(){
+        return prvService.getPrivilegeTypes();
     }
 }

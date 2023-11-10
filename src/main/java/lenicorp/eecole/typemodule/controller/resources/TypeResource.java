@@ -1,11 +1,9 @@
 package lenicorp.eecole.typemodule.controller.resources;
 
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lenicorp.eecole.typemodule.controller.repositories.TypeRepo;
 import lenicorp.eecole.typemodule.controller.services.ITypeService;
-import lenicorp.eecole.typemodule.model.dtos.CreateTypeDTO;
-import lenicorp.eecole.typemodule.model.dtos.ReadTypeDTO;
-import lenicorp.eecole.typemodule.model.dtos.TypeParamDTO;
-import lenicorp.eecole.typemodule.model.dtos.UpdateTypeDTO;
+import lenicorp.eecole.typemodule.model.dtos.*;
 import lenicorp.eecole.typemodule.model.entities.Type;
 import lenicorp.eecole.typemodule.model.enums.TypeGroup;
 import jakarta.validation.Valid;
@@ -17,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Profile({"dev", "prod"})
@@ -55,7 +54,7 @@ public class TypeResource
     }
 
     //@PreAuthorize("permitAll()")
-    @GetMapping(path = "/is-sous-type-of/{parentId}/{childId}")
+    @GetMapping(path = "/is-sous-type-of/{parentCode}/{childCode}")
     public boolean isSousTypeOf(@PathVariable String parentCode, @PathVariable String childCode)
     {
         return typeRepo.isSousTypeOf(parentCode, childCode);
@@ -69,17 +68,24 @@ public class TypeResource
     }
 
     //@PreAuthorize("permitAll()")
-    @GetMapping(path = "/exists-by-uniqueCode")
-    public boolean existsByUniqueCode(@RequestParam(defaultValue = "") String uniqueCode)
+    @GetMapping(path = "/exists-by-uniqueCode/{uniqueCode}")
+    public boolean existsByUniqueCode(@PathVariable String uniqueCode)
     {
         return typeRepo.existsByUniqueCode(uniqueCode);
     }
 
-   // @PreAuthorize("isAnonymous()")
-    @GetMapping(path = "/exists-by-id")
-    public boolean existsById(@RequestParam String typeCode)
+    @GetMapping(path = "/exists-by-groupe-and-uniqueCode/{groupCode}/{uniqueCode}")
+    public boolean existsByGroupAndUniqueCode(@PathVariable String groupCode, @PathVariable String uniqueCode)
     {
-        return typeRepo.existsById(typeCode);
+        if(TypeGroup.valueOf(groupCode) == null) return false;
+        return typeRepo.existsByGroupAndUniqueCode(TypeGroup.valueOf(groupCode), uniqueCode);
+    }
+
+   // @PreAuthorize("isAnonymous()")
+    @GetMapping(path = "/exists-by-name")
+    public boolean existsByTypeCode(@RequestParam(defaultValue = "") String name, @RequestParam(required = false) String uniqueCode)
+    {
+        return typeService.existsByName(name, uniqueCode);
     }
 
     //@PreAuthorize("hasAuthority('DEV')")
@@ -112,8 +118,19 @@ public class TypeResource
         typeService.removeSousType(dto);
     }
 
-    @GetMapping(path = "/list")
-    public Page<Type> searchTypes(@RequestParam(defaultValue = "") String key, String typeGroup, @RequestParam(defaultValue = "0") int num, @RequestParam(defaultValue = "2") int size) throws UnknownHostException {
-        return typeService.searchPageOfTypes(key, typeGroup, num, size);
+    @GetMapping(path = "/search")
+    public Page<Type> searchTypes(@RequestParam(defaultValue = "") String key, @RequestParam(required = false)ArrayList<String> typeGroups, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws UnknownHostException {
+        return typeService.searchPageOfTypes(key, typeGroups, page, size);
+    }
+
+    @GetMapping(path = "/type-groups")
+    public List<SelectOption> getTypeGroupOptions(){
+        return typeService.getTypeGroupOptions();
+    }
+
+    @GetMapping(path = "/type-group-is-valid/{typeGroup}")
+    public boolean typeGroupIsValid(@PathVariable String typeGroup)
+    {
+        return typeService.typeGroupIsValid(typeGroup);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
 import lenicorp.eecole.moduleauth.controller.repositories.FunctionRepo;
+import lenicorp.eecole.moduleauth.controller.repositories.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +26,11 @@ public @interface UserHasAnyFunction
     class UserHasAnyFunctionValidatorOnlogin implements ConstraintValidator<UserHasAnyFunction, LoginDTO>
     {
         private final FunctionRepo fncRepo;
+        private final UserRepo userRepo;
         @Override
         public boolean isValid(LoginDTO dto, ConstraintValidatorContext context)
         {
-            if(dto == null || dto.getUsername() == null) return true;
+            if(dto == null || dto.getUsername() == null || !userRepo.existsByEmail(dto.getUsername())) return true;
             return fncRepo.userHasAnyAppFunction(dto.getUsername());
         }
     }

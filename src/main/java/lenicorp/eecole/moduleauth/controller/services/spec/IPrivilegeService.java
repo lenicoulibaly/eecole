@@ -4,6 +4,7 @@ import lenicorp.eecole.moduleauth.model.dtos.appprivilege.CreatePrivilegeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.PrvByTypeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.SelectedPrvDTO;
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,10 +15,12 @@ import java.util.Set;
 public interface IPrivilegeService
 {
     ReadPrvDTO createPrivilege(CreatePrivilegeDTO dto) throws UnknownHostException;
-    Page<ReadPrvDTO> searchPrivileges(String searchKey, Pageable pageable);
+    Page<ReadPrvDTO> searchPrivileges(String searchKey, List<String> typePrvUniqueCodes, Pageable pageable);
     List<SelectedPrvDTO> getSelectedPrvs(Set<String> roleCodes);
     List<SelectedPrvDTO> getSelectedPrvs(Long prAssId, Set<String> oldRoleCodes, Set<String> roleCodes, Set<String> prvCodes);
     PrvByTypeDTO getPrivlegesByTypeCode(String typeCode);
 
     List<PrvByTypeDTO> getAllPrivlegesGroupesByType();
+
+    List<SelectOption> getPrivilegeTypes();
 }

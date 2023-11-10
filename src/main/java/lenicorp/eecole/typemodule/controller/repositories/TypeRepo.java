@@ -33,7 +33,7 @@ public interface TypeRepo extends JpaRepository<Type, String>
     @Query("select t from Type t where (upper(t.name) like upper(concat('%', coalesce(?1, '') , '%')) or upper(t.uniqueCode) like upper(concat('%', coalesce(?1, ''), '%')) or t.typeGroup = ?2) and t.status = ?3")
     Page<Type> searchPageOfTypes(String key, TypeGroup typeGroup, PersStatus status, Pageable pageable);
 
-    @Query("select t from Type t where (upper(t.name) like upper(concat('%', coalesce(?1, ''), '%')) or upper(t.uniqueCode) like upper(concat('%', coalesce(?1, ''), '%')) or t.typeGroup in ?2) and t.status = ?3")
+    @Query("select t from Type t where (upper(t.name) like upper(concat('%', coalesce(?1, ''), '%')) or upper(t.uniqueCode) like upper(concat('%', coalesce(?1, ''), '%'))) and t.typeGroup in ?2 and t.status = ?3")
     Page<Type> searchPageOfTypes(String key, Collection<TypeGroup> typeGroups, PersStatus status, Pageable pageable);
 
     @Query("select t from Type t where (upper(t.name) like upper(concat('%', coalesce(?1, ''), '%')) or upper(t.uniqueCode) like upper(concat('%', coalesce(?1, ''), '%'))) and t.status = ?2")
@@ -65,6 +65,9 @@ public interface TypeRepo extends JpaRepository<Type, String>
 
     @Query("select (count(t) > 0) from Type t where upper(t.uniqueCode) = upper(?1)")
     boolean existsByUniqueCode(String uniqueCode);
+
+    @Query("select (count(t) > 0) from Type t where t.typeGroup = ?1 and upper(t.uniqueCode) = upper(?2)")
+    boolean existsByGroupAndUniqueCode(TypeGroup valueOf, String uniqueCode);
 
     @Query("select (count(stp) = 0) from TypeParam stp where stp.child.uniqueCode = ?1 or stp.parent.uniqueCode = ?1")
     boolean isDeletable(String uniqueCode);
@@ -98,4 +101,10 @@ public interface TypeRepo extends JpaRepository<Type, String>
     @Query("select tp.child from TypeParam tp where tp.parent.uniqueCode = ?1 and tp.status = 'ACTIVE'")
     List<Type> getChildren(String uniqueCode);
 
+
+    @Query("select (count(t.uniqueCode)>0) from Type t where t.name = ?1")
+    boolean existsByName(String name);
+
+    @Query("select (count(t.uniqueCode)>0) from Type t where t.name = ?1 and t.uniqueCode <> ?2")
+    boolean existsByName(String name, String uniqueCode);
 }

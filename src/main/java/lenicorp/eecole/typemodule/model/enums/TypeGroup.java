@@ -3,6 +3,9 @@ package lenicorp.eecole.typemodule.model.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 @Getter @AllArgsConstructor
 public enum TypeGroup
 {
@@ -13,8 +16,14 @@ public enum TypeGroup
     MODE_REGLEMENT("TYP_MOD_REG", "MODE_REGLEMENT"),
     TYPE_CIVILITE("TYP_CIV", "Civilité"),
     TYPE_PIECE("TYP_PCE", "Type de pièce"),
-    TYPE_FONCTION("TYP_FNC", "Type de fonction"),
+    TYPE_FUNCTION("TYP_FNC", "Type de fonction"),
     TYPE_USER("TYP_USER", "Type d'utilisateur");
     private String groupCode;
     private String groupName;
+
+    public static boolean hasValue(String value)
+    {
+        if(value==null || value.trim().equals("")) return false;
+        return Arrays.stream(TypeGroup.values()).map(tg->tg.name()).collect(Collectors.toList()).contains(value);
+    }
 }

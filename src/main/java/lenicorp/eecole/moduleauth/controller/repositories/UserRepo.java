@@ -17,13 +17,13 @@ public interface UserRepo extends JpaRepository<AppUser, Long>
     @Query("select (count(a) > 0) from AppUser a where upper(a.email) = upper(?1)")
     boolean alreadyExistsByEmail(String email);
 
-    @Query("select (count(a) > 0) from AppUser a where a.email = ?1 and a.userId <> ?2")
+    @Query("select (count(a) > 0) from AppUser a where a.email = ?1 and (?2 is null or a.userId <> ?2)")
     boolean alreadyExistsByEmail(String email, Long userId);
 
     @Query("select (count(a) > 0) from AppUser a where upper(a.tel) = upper(?1)")
     boolean alreadyExistsByTel(String tel);
 
-    @Query("select (count(a) > 0) from AppUser a where upper(a.tel) = upper(?1) and a.userId <> ?2")
+    @Query("select (count(a) > 0) from AppUser a where upper(a.tel) = upper(?1) and (?2 is null or a.userId <> ?2)")
     boolean alreadyExistsByTel(String tel, Long userId);
 
     Optional<AppUser> findByEmail(String email);
@@ -45,21 +45,21 @@ public interface UserRepo extends JpaRepository<AppUser, Long>
     @Query("""
         select new lenicorp.eecole.moduleauth.model.dtos.appuser.ReadUserDTO(
         u.userId, u.firstName, u.lastName, u.email, u.tel, u.lieuNaissance, u.dateNaissance, e.id, e.nomEcole, 
-        e.sigleEcole, u.civilite.uniqueCode, u.nationalite.codePays, u.nationalite.nationalite, u.typePiece.uniqueCode, 
-        u.typePiece.name, u.numPiece, u.nomPere, u.nomMere, u.typeUtilisateur.uniqueCode, u.typeUtilisateur.name, u.active, 
-        u.notBlocked, u.currentFunctionId, u.statut.staCode, u.statut.staLibelle, null, null) 
-        from AppUser u left join u.ecole e
-        where (locate(concat(:codeEcole, '/'), e.codeEcole) = 1 or :codeEcole = e.codeEcole) 
+        e.sigleEcole, u.civilite.uniqueCode, n.codePays, n.nationalite, tp.uniqueCode, 
+        tp.name, u.numPiece, u.nomPere, u.nomMere, tu.uniqueCode, tu.name, u.active, 
+        u.notBlocked, u.currentFunctionId, s.staCode, s.staLibelle) 
+        from AppUser u left join u.ecole e left join u.nationalite n left join u.typePiece tp 
+        left join u.typeUtilisateur tu left join u.statut s
+        where (locate(concat(:codeEcole, '/'), e.codeEcole) = 1 or :codeEcole = e.codeEcole or e.codeEcole is null) 
         and (locate(upper(coalesce(:key, '')), upper(cast(function('strip_accents',  coalesce(u.firstName, '') ) as string))) >0 
         or locate(upper(coalesce(:key, '') ), upper(cast(function('strip_accents',  coalesce(u.lastName, '') ) as string))) >0
         or locate(upper(coalesce(:key, '') ), upper(cast(function('strip_accents',  coalesce(u.email, '') ) as string))) >0
         or locate(upper(coalesce(:key, '') ), upper(cast(function('strip_accents',  coalesce(u.tel, '') ) as string))) >0
         or locate(upper(coalesce(:key, '') ), upper(cast(function('strip_accents',  coalesce(u.lieuNaissance, '') ) as string) )) >0
-        )       
-       
+        )
         and (u.statut.staCode is null or u.statut.staCode in :staCodes)
 """)
-    Page<ListUserDTO> searchUsers(@Param("key") String key,
+    Page<ReadUserDTO> searchUsers(@Param("key") String key,
                                   @Param("codeEcole") String codeEcole,
                                   @Param("staCodes") List<String> staCode,
                                   Pageable pageable);
@@ -69,7 +69,7 @@ public interface UserRepo extends JpaRepository<AppUser, Long>
         u.userId, u.firstName, u.lastName, u.email, u.tel, u.lieuNaissance, u.dateNaissance, e.id, e.nomEcole, 
         e.sigleEcole, u.civilite.uniqueCode, u.nationalite.codePays, u.nationalite.nationalite, u.typePiece.uniqueCode, 
         u.typePiece.name, u.numPiece, u.nomPere, u.nomMere, u.typeUtilisateur.uniqueCode, u.typeUtilisateur.name, u.active, 
-        u.notBlocked, u.currentFunctionId, u.statut.staCode, u.statut.staLibelle, null, null) 
+        u.notBlocked, u.currentFunctionId, u.statut.staCode, u.statut.staLibelle) 
         from AppUser u left join u.ecole e where u.userId = ?1
     """)
     ReadUserDTO findReadUserDto(Long userId);

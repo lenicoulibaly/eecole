@@ -51,8 +51,8 @@ public class UserResource
         return userService.createUserAndFunction(dto);
     }
 
-    @GetMapping(path = "/list")
-    public Page<ListUserDTO> searchUser(@RequestParam(defaultValue = "") String key,
+    @GetMapping(path = "/search")
+    public Page<ReadUserDTO> searchUser(@RequestParam(defaultValue = "") String key,
                                         @RequestParam(defaultValue = "0") int page,
                                         @RequestParam(defaultValue = "10") int size) throws UnknownHostException, IllegalAccessException {
         return userService.searchUsers(key, new ArrayList<>(), PageRequest.of(page, size));
@@ -111,5 +111,25 @@ public class UserResource
     @GetMapping(path = "/token-introspection")
     public JwtInfos getJwtInfos() throws UnknownHostException, IllegalAccessException {
         return jwtService.getJwtInfos();
+    }
+
+    @GetMapping(path = "/open/exists-by-email/{email}/{userId}")
+    public boolean existsByEmail(@PathVariable String email, @PathVariable(required = false) Long userId) throws UnknownHostException, IllegalAccessException {
+        return userService.existsByEmail(email, userId);
+    }
+
+    @GetMapping(path = "/open/exists-by-email/{email}")
+    public boolean existsByEmail(@PathVariable String email) throws UnknownHostException, IllegalAccessException {
+        return userService.existsByEmail(email, null);
+    }
+
+    @GetMapping(path = "/open/exists-by-tel/{tel}/{userId}")
+    public boolean existsByTel(@PathVariable String tel, @PathVariable(required = false) Long userId) throws UnknownHostException, IllegalAccessException {
+        return userService.existsByTel(tel, userId);
+    }
+
+    @GetMapping(path = "/open/exists-by-tel/{tel}")
+    public boolean existsByTel(@PathVariable String tel) throws UnknownHostException, IllegalAccessException {
+        return userService.existsByTel(tel, null);
     }
 }

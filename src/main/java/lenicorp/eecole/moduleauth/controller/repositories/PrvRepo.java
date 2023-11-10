@@ -17,15 +17,12 @@ public interface PrvRepo extends JpaRepository<AppPrivilege, Long>
     @Query("select (count(p.privilegeCode)>0) from AppPrivilege p where upper(p.privilegeCode) = upper(?1) ")
     boolean existsByCode(String prvCode);
 
-    @Query("select (count(p.privilegeCode)>0) from AppPrivilege p where upper(p.privilegeCode) = upper(?1) and p.privilegeCode <> ?2")
-    boolean existsByCode(String prvCode, Long prvId);
-
 
     @Query("select (count(p.privilegeCode)>0) from AppPrivilege p where upper(p.privilegeName) = upper(?1)")
     boolean existsByName(String name);
 
     @Query("select (count(p.privilegeCode)>0) from AppPrivilege p where upper(p.privilegeName) = upper(?1) and p.privilegeCode <> ?2")
-    boolean existsByName(String name, Long prvId);
+    boolean existsByName(String name, String prvCode);
 
     @Query("SELECT prv FROM AppPrivilege prv WHERE " +
             "locate(upper(coalesce(:searchKey, '')) , upper(CAST(FUNCTION('strip_accents', prv.privilegeCode) AS string )) ) > 0 OR " +
@@ -37,6 +34,12 @@ public interface PrvRepo extends JpaRepository<AppPrivilege, Long>
             "locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0")
     Page<AppPrivilege> searchPrivileges(@Param("searchKey") String searchKey, Pageable pageable);
 
+    @Query("""
+            SELECT prv FROM AppPrivilege prv WHERE prv.prvType.uniqueCode in :typePrvUniqueCodes and
+            (locate(upper(coalesce(:searchKey, '') ) , upper(CAST(FUNCTION('strip_accents', prv.privilegeCode) AS string )) ) > 0 OR
+            locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0)
+            """)
+    Page<AppPrivilege> searchPrivileges(@Param("searchKey") String searchKey, @Param("typePrvUniqueCodes") List<String> typePrvUniqueCodes, Pageable pageable);
 
     @Query("""
     select new lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO

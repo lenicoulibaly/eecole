@@ -39,10 +39,13 @@ public interface IUserService
 
     UserStatus getUserStatus(Long userId);
 
-    Page<ListUserDTO> searchUsers(String key, List<String> userStaCode, Pageable pageable);
+    Page<ReadUserDTO> searchUsers(String key, List<String> userStaCode, Pageable pageable);
 
     ReadUserDTO createUserAndFunction(CreaterUserAndFunctionDTO dto) throws UnknownHostException, IllegalAccessException;
 
 
     ReadUserDTO getUserInfos(Long userId);
+
+    boolean existsByEmail(String email, Long userId);
+    boolean existsByTel(String email, Long userId);
 }

@@ -8,9 +8,11 @@ import lenicorp.eecole.moduleauth.model.constants.AuthTables;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.*;
 import lenicorp.eecole.moduleauth.model.entities.AppPrivilege;
 import lenicorp.eecole.modulelog.controller.service.ILogService;
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lenicorp.eecole.sharedmodule.exceptions.AppException;
 import lenicorp.eecole.sharedmodule.utilities.StringUtils;
 import lenicorp.eecole.typemodule.controller.repositories.TypeRepo;
+import lenicorp.eecole.typemodule.model.dtos.ReadTypeDTO;
 import lenicorp.eecole.typemodule.model.entities.Type;
 import lenicorp.eecole.typemodule.model.enums.TypeGroup;
 import lombok.RequiredArgsConstructor;
@@ -47,9 +49,11 @@ public class PrivilegeService implements IPrivilegeService
     }
 
     @Override
-    public Page<ReadPrvDTO> searchPrivileges(String searchKey, Pageable pageable)
+    public Page<ReadPrvDTO> searchPrivileges(String searchKey, List<String> typePrvUniqueCodes, Pageable pageable)
     {
-        Page<AppPrivilege> privilegePage = prvRepo.searchPrivileges(StringUtils.stripAccentsToUpperCase(searchKey), pageable);
+        Page<AppPrivilege> privilegePage = typePrvUniqueCodes == null || typePrvUniqueCodes.isEmpty() ?
+                prvRepo.searchPrivileges(StringUtils.stripAccentsToUpperCase(searchKey), pageable) :
+                prvRepo.searchPrivileges(StringUtils.stripAccentsToUpperCase(searchKey), typePrvUniqueCodes, pageable) ;
         List<ReadPrvDTO> readPrvDTOS = privilegePage.stream().map(prvMapper::mapToReadPrivilegeDTO).collect(Collectors.toList());
         return new PageImpl<>(readPrvDTOS, pageable, privilegePage.getTotalElements());
     }
@@ -94,5 +98,12 @@ public class PrivilegeService implements IPrivilegeService
         List<PrvByTypeDTO> PrvByTypeDTOs = typeRepo.findTypeCodesByTypeGroup(TypeGroup.TYPE_PRV).stream().map(id->this.getPrivlegesByTypeCode(id)).filter(Objects::nonNull)
                 .sorted(Comparator.comparing(PrvByTypeDTO::getTypeName)).collect(Collectors.toList());
         return PrvByTypeDTOs;
+    }
+
+    @Override
+    public List<SelectOption> getPrivilegeTypes()
+    {
+        List<ReadTypeDTO> types = typeRepo.findByTypeGroup(TypeGroup.TYPE_PRV);
+        return types.stream().map(t->new SelectOption(t.getName(), t.getUniqueCode())).collect(Collectors.toList());
     }
 }

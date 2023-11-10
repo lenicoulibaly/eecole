@@ -12,9 +12,13 @@ insert into type (name, object_folder, status, type_group, unique_code) values (
 insert into type (name, object_folder, status, type_group, unique_code) values ('Enseignant', null, 'ACTIVE', 'TYPE_PIECE','ENSEIGNAT');
 insert into type (name, object_folder, status, type_group, unique_code) values ('Administratif', null, 'ACTIVE', 'TYPE_USER','ADMINISTRATIF');
 
-insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction élève', null, 'ACTIVE', 'TYPE_FONCTION','FNC_ELEVE');
-insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction enseignant', null, 'ACTIVE', 'TYPE_FONCTION','FNC_ENSEIGNAT');
-insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction administratif', null, 'ACTIVE', 'TYPE_FONCTION','FNC_ADMINISTRATIF');
-insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction comptable', null, 'ACTIVE', 'TYPE_FONCTION','FNC_COMPTABLE');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction élève', null, 'ACTIVE', 'TYPE_FUNCTION','FNC_ELEVE');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction enseignant', null, 'ACTIVE', 'TYPE_FUNCTION','FNC_ENSEIGNAT');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction administratif', null, 'ACTIVE', 'TYPE_FUNCTION','FNC_ADMINISTRATIF');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction comptable', null, 'ACTIVE', 'TYPE_FUNCTION','FNC_COMPTABLE');
 
 
+insert into type (name, object_folder, status, type_group, unique_code) values ('Utilisateur', null, 'ACTIVE', 'TYPE_PRV','PRV_USER');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Fonction', null, 'ACTIVE', 'TYPE_PRV','PRV_FNC');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Role', null, 'ACTIVE', 'TYPE_PRV','PRV_ROLE');
+insert into type (name, object_folder, status, type_group, unique_code) values ('Privilège', null, 'ACTIVE', 'TYPE_PRV','PRV_PRV');
