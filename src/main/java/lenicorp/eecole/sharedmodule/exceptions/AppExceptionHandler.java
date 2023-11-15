@@ -8,6 +8,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,7 +18,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice @RequiredArgsConstructor
 public class AppExceptionHandler
@@ -25,17 +29,29 @@ public class AppExceptionHandler
     private final ILogService logService;
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException err)
+    public Map<String, List<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException err)
     {
-        List<String> errorMessages = new ArrayList<>();
-
-        err.getGlobalErrors().forEach(e->{
-            String gErr = e.getDefaultMessage();
-            if(gErr != null && gErr.contains("::")) errorMessages.add(gErr.split("::")[1]);
-            if(gErr != null && !gErr.contains("::")) errorMessages.add(gErr);
+        Map<String, List<String>> errorMap = new HashMap<>();
+        err.getGlobalErrors().stream().filter(e->e.getDefaultMessage().contains("::")).map(e->e.getDefaultMessage().split("::")[0]).forEach(f->
+        {
+            List<String> errors = err.getGlobalErrors().stream().filter(e->e.getDefaultMessage().contains("::"))
+                    .filter(e->e.getDefaultMessage().split("::")[0].equals(f))
+                    .map(e->e.getDefaultMessage().split("::")[1]).collect(Collectors.toList());
+            errorMap.put(f, errors);
         });
-        err.getBindingResult().getFieldErrors().forEach(e->errorMessages.add(e.getDefaultMessage()));
-        return errorMessages;
+
+        List<String> globalErrors = err.getGlobalErrors().stream().filter(e->!e.getDefaultMessage().contains("::")).map(e->e.getDefaultMessage()).collect(Collectors.toList());
+
+        if(globalErrors != null && !globalErrors.isEmpty()) errorMap.put("global", globalErrors);
+
+        List<FieldError> fieldErrors = err.getBindingResult().getFieldErrors();
+        List<String> fields = fieldErrors.stream().map(FieldError::getField).collect(Collectors.toList());
+        fields.forEach(f->
+        {
+            List<String> errors = fieldErrors.stream().filter(f1->f1.getField().equals(f)).map(FieldError::getDefaultMessage).collect(Collectors.toList());
+            errorMap.put(f, errors);
+        });
+        return errorMap;
     }
 
     @ExceptionHandler
