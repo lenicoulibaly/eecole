@@ -1,6 +1,6 @@
 package lenicorp.eecole.moduleauth.model.dtos.asignation;
 
-import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ExistingPrivilegeId;
+import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ExistingPrivilegeCode;
 import lenicorp.eecole.moduleauth.model.dtos.approle.ExistingRoleCode;
 import lombok.*;
 
@@ -11,7 +11,7 @@ public class PrvToRoleDTO
 {
     @ExistingRoleCode
     private Long roleId;
-    @ExistingPrivilegeId
+    @ExistingPrivilegeCode
     private Long privilegeId;
     private LocalDateTime startsAt;
     private LocalDateTime endsAt;

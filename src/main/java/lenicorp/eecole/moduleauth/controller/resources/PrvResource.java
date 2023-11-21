@@ -7,6 +7,7 @@ import lenicorp.eecole.moduleauth.controller.services.spec.IPrivilegeService;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.CreatePrivilegeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.PrvByTypeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO;
+import lenicorp.eecole.moduleauth.model.dtos.appprivilege.UpdatePrivilegeDTO;
 import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,9 +32,14 @@ public class PrvResource
         return prvService.createPrivilege(dto);
     }
 
+    @PutMapping(path = "/update")
+    public ReadPrvDTO updatePrv(@RequestBody @Valid UpdatePrivilegeDTO dto) throws UnknownHostException, IllegalAccessException {
+        return prvService.updatePrivilege(dto);
+    }
+
     @GetMapping(path = "/search")
-    public Page<ReadPrvDTO> searchPrv(@RequestParam(defaultValue = "") String key, @RequestParam List<String> typePrvUniqueCodes, @RequestParam(defaultValue = "0") int num, @RequestParam(defaultValue = "10000") int size){
-        return prvService.searchPrivileges(key, typePrvUniqueCodes, PageRequest.of(num, size));
+    public Page<ReadPrvDTO> searchPrv(@RequestParam(defaultValue = "") String key, @RequestParam List<String> typePrvUniqueCodes, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10000") int size){
+        return prvService.searchPrivileges(key, typePrvUniqueCodes, PageRequest.of(page, size));
     }
 
     @GetMapping(path = "/grouped-by-type")
@@ -42,13 +48,8 @@ public class PrvResource
     }
 
     @GetMapping(path = "/existsByName/{name}")
-    public boolean existsByName(@PathVariable String name){
-        return prvRepo.existsByName(name);
-    }
-
-    @GetMapping(path = "/existsByName/{name}/{privilegeCode}")
-    public boolean existsByName(@PathVariable String name, @PathVariable String privilegeCode){
-        return prvRepo.existsByName(name, privilegeCode);
+    public boolean existsByName(@PathVariable String name, @RequestParam(required = false, defaultValue = "") String privilegeCode){
+        return prvService.existsByName(name, privilegeCode);
     }
 
     @GetMapping(path = "/existsByCode/{privilegeCode}")
@@ -74,5 +75,17 @@ public class PrvResource
     @GetMapping(path = "/types")
     public List<SelectOption> getPrvTypesOptions(){
         return prvService.getPrivilegeTypes();
+    }
+
+    @GetMapping(path = "/type-is-valid/{typeCode}")
+    public boolean privilegeTypeIsValid(@PathVariable String typeCode)
+    {
+        return prvService.privilegeTypeIsValid(typeCode);
+    }
+
+    @GetMapping(path = "/by-typeCodes")
+    public List<SelectOption> getPrivilegesByTypes(@RequestParam(required = false) List<String> typeCodes)
+    {
+        return prvService.getPrivilegesByTypes(typeCodes);
     }
 }

@@ -14,5 +14,6 @@ public interface PrivilegeMapper
     @Mapping(target = "prvType.uniqueCode", source = "typeCode")
     AppPrivilege mapToPrivilege(CreatePrivilegeDTO dto);
     @Mapping(target = "prvTypeName", source = "prvType.name")
+    @Mapping(target = "typeCode", source = "prvType.uniqueCode")
     ReadPrvDTO mapToReadPrivilegeDTO(AppPrivilege privilege);
 }

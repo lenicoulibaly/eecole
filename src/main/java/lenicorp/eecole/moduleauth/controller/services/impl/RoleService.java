@@ -123,7 +123,6 @@ public class RoleService implements IRoleService
                     e.printStackTrace();
                 }
             }
-
         });
 
         prvCodesToChangeTheDates.forEach(id->

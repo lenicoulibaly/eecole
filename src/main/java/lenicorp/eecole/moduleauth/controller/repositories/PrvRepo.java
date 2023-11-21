@@ -3,6 +3,7 @@ package lenicorp.eecole.moduleauth.controller.repositories;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.PrvByTypeDTO;
 import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO;
 import lenicorp.eecole.moduleauth.model.entities.AppPrivilege;
+import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Set;
 
-public interface PrvRepo extends JpaRepository<AppPrivilege, Long>
+public interface PrvRepo extends JpaRepository<AppPrivilege, String>
 {
     @Query("select (count(p.privilegeCode)>0) from AppPrivilege p where upper(p.privilegeCode) = upper(?1) ")
     boolean existsByCode(String prvCode);
@@ -26,12 +27,14 @@ public interface PrvRepo extends JpaRepository<AppPrivilege, Long>
 
     @Query("SELECT prv FROM AppPrivilege prv WHERE " +
             "locate(upper(coalesce(:searchKey, '')) , upper(CAST(FUNCTION('strip_accents', prv.privilegeCode) AS string )) ) > 0 OR " +
-            "locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0")
+            "locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0" +
+            "order by prv.updatedAt desc, prv.createdAt desc, prv.privilegeCode asc")
     Set<AppPrivilege> searchPrivileges(@Param("searchKey") String searchKey);
 
     @Query("SELECT prv FROM AppPrivilege prv WHERE " +
             "locate(upper(coalesce(:searchKey, '') ) , upper(CAST(FUNCTION('strip_accents', prv.privilegeCode) AS string )) ) > 0 OR " +
-            "locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0")
+            "locate(upper(coalesce(:searchKey, '')), upper(CAST(FUNCTION('strip_accents', prv.privilegeName) as string))) > 0" +
+            "order by prv.updatedAt desc, prv.createdAt desc, prv.privilegeCode asc")
     Page<AppPrivilege> searchPrivileges(@Param("searchKey") String searchKey, Pageable pageable);
 
     @Query("""
@@ -87,4 +90,10 @@ public interface PrvRepo extends JpaRepository<AppPrivilege, Long>
 
     @Query("select p from AppPrivilege p where p.privilegeCode in ?1")
     List<AppPrivilege> findByPrvCodes(List<String> asList);
+
+    @Query("select new lenicorp.eecole.sharedmodule.dtos.SelectOption(p.privilegeCode, p.privilegeName, p.prvType.name) from AppPrivilege p where p.prvType.uniqueCode in ?1")
+    List<SelectOption> getPrivilegesByTypes(List<String> typeCodes);
+
+    @Query("select new lenicorp.eecole.sharedmodule.dtos.SelectOption(p.privilegeCode, p.privilegeName, p.prvType.name) from AppPrivilege p")
+    List<SelectOption> getAll();
 }

@@ -29,29 +29,17 @@ public class AppExceptionHandler
     private final ILogService logService;
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, List<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException err)
+    public List<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException err)
     {
-        Map<String, List<String>> errorMap = new HashMap<>();
-        err.getGlobalErrors().stream().filter(e->e.getDefaultMessage().contains("::")).map(e->e.getDefaultMessage().split("::")[0]).forEach(f->
-        {
-            List<String> errors = err.getGlobalErrors().stream().filter(e->e.getDefaultMessage().contains("::"))
-                    .filter(e->e.getDefaultMessage().split("::")[0].equals(f))
-                    .map(e->e.getDefaultMessage().split("::")[1]).collect(Collectors.toList());
-            errorMap.put(f, errors);
+        List<String> errorMessages = new ArrayList<>();
+
+        err.getGlobalErrors().forEach(e->{
+            String gErr = e.getDefaultMessage();
+            if(gErr != null && gErr.contains("::")) errorMessages.add(gErr.split("::")[1]);
+            if(gErr != null && !gErr.contains("::")) errorMessages.add(gErr);
         });
-
-        List<String> globalErrors = err.getGlobalErrors().stream().filter(e->!e.getDefaultMessage().contains("::")).map(e->e.getDefaultMessage()).collect(Collectors.toList());
-
-        if(globalErrors != null && !globalErrors.isEmpty()) errorMap.put("global", globalErrors);
-
-        List<FieldError> fieldErrors = err.getBindingResult().getFieldErrors();
-        List<String> fields = fieldErrors.stream().map(FieldError::getField).collect(Collectors.toList());
-        fields.forEach(f->
-        {
-            List<String> errors = fieldErrors.stream().filter(f1->f1.getField().equals(f)).map(FieldError::getDefaultMessage).collect(Collectors.toList());
-            errorMap.put(f, errors);
-        });
-        return errorMap;
+        err.getBindingResult().getFieldErrors().forEach(e->errorMessages.add(e.getDefaultMessage()));
+        return errorMessages;
     }
 
     @ExceptionHandler

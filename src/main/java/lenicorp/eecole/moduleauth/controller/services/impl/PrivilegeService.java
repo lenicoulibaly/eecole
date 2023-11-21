@@ -10,6 +10,7 @@ import lenicorp.eecole.moduleauth.model.entities.AppPrivilege;
 import lenicorp.eecole.modulelog.controller.service.ILogService;
 import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import lenicorp.eecole.sharedmodule.exceptions.AppException;
+import lenicorp.eecole.sharedmodule.utilities.ObjectCopier;
 import lenicorp.eecole.sharedmodule.utilities.StringUtils;
 import lenicorp.eecole.typemodule.controller.repositories.TypeRepo;
 import lenicorp.eecole.typemodule.model.dtos.ReadTypeDTO;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.UnknownHostException;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,7 @@ public class PrivilegeService implements IPrivilegeService
     private final PrivilegeMapper prvMapper;
     private final ILogService logger;
     private final TypeRepo typeRepo;
+    private final ObjectCopier<AppPrivilege> prvCopier;
 
     @Override @Transactional
     public ReadPrvDTO createPrivilege(CreatePrivilegeDTO dto) throws UnknownHostException {
@@ -104,6 +107,36 @@ public class PrivilegeService implements IPrivilegeService
     public List<SelectOption> getPrivilegeTypes()
     {
         List<ReadTypeDTO> types = typeRepo.findByTypeGroup(TypeGroup.TYPE_PRV);
-        return types.stream().map(t->new SelectOption(t.getName(), t.getUniqueCode())).collect(Collectors.toList());
+        return types.stream().map(t->new SelectOption( t.getUniqueCode(), t.getName())).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsByName(String name, String privilegeCode)
+    {
+        if(name == null || name.trim().equals("")) return false;
+        if(privilegeCode == null || privilegeCode.trim().equals("")) return prvRepo.existsByName(name);
+        return prvRepo.existsByName(name, privilegeCode);
+    }
+
+    @Override
+    public boolean privilegeTypeIsValid(String typeCode) {
+        return typeRepo.existsByGroupAndUniqueCode(TypeGroup.TYPE_PRV, typeCode);
+    }
+
+    @Override @Transactional
+    public ReadPrvDTO updatePrivilege(UpdatePrivilegeDTO dto) throws UnknownHostException {
+        AppPrivilege privilege = prvRepo.findById(dto.getPrivilegeCode()).orElseThrow(()->new AppException("Privilège introuvable"));
+        AppPrivilege oldPrivilege = prvCopier.copy(privilege);
+        privilege.setPrivilegeName(dto.getPrivilegeName());
+        privilege.setPrvType(new Type(dto.getTypeCode()));
+        logger.logg(AuthActions.UPDATE_PRV, oldPrivilege, privilege, AuthTables.PRV_TABLE, null);
+        return prvMapper.mapToReadPrivilegeDTO(privilege);
+    }
+
+    @Override
+    public List<SelectOption> getPrivilegesByTypes(List<String> typeCodes)
+    {
+        if(typeCodes == null || typeCodes.isEmpty()) return prvRepo.getAll();
+        return prvRepo.getPrivilegesByTypes(typeCodes);
     }
 }

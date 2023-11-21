@@ -42,7 +42,7 @@ public @interface UniqueTypeCode
         @Override
         public boolean isValid(UpdateTypeDTO dto, ConstraintValidatorContext context)
         {
-            return !typeRepo.existsByUniqueCode(dto.getUniqueCode());
+            return !typeRepo.existsByUniqueCode(dto.getUniqueCode(), dto.getOldUniqueCode());
         }
     }
 }

@@ -45,9 +45,10 @@ public class TypeService implements ITypeService
 
     @Override @Transactional
     public Type updateType(UpdateTypeDTO dto) throws UnknownHostException {
-        Type loadedType = typeRepo.findById(dto.getUniqueCode()).orElseThrow(()->new AppException("Type introuvable : " + dto.getUniqueCode()));
+        Type loadedType = typeRepo.findById(dto.getOldUniqueCode()).orElseThrow(()->new AppException("Type introuvable : " + dto.getOldUniqueCode()));
         Type oldType = typeCopier.copy(loadedType);
-        loadedType.setTypeGroup(Arrays.stream(TypeGroup.values()).filter(gr->gr.getGroupCode().equalsIgnoreCase(dto.getTypeGroup())).findFirst().orElse(null));
+
+        loadedType.setTypeGroup(TypeGroup.valueOf(dto.getTypeGroup()));
         loadedType.setName(dto.getName().toUpperCase(Locale.ROOT));
         loadedType.setUniqueCode(dto.getUniqueCode().toUpperCase(Locale.ROOT));
         logger.logg(TypeActions.UPDATE_TYPE, oldType, loadedType, TypeTables.TYPE, null);
@@ -93,6 +94,14 @@ public class TypeService implements ITypeService
     {
         if(typeGroup == null || typeGroup.trim().equals("")) return false;
         return TypeGroup.hasValue(typeGroup);
+    }
+
+    @Override
+    public boolean existsByUniqueCode(String uniqueCode, String oldUniqueCode)
+    {
+        if(uniqueCode == null || uniqueCode.trim().equals("")) return false;
+        if(oldUniqueCode==null || oldUniqueCode.trim().equals("")) return typeRepo.existsByUniqueCode(uniqueCode);
+        return typeRepo.existsByUniqueCode(uniqueCode, oldUniqueCode);
     }
 
     @Override @Transactional

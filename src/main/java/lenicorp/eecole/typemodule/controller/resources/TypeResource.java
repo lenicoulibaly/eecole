@@ -69,9 +69,9 @@ public class TypeResource
 
     //@PreAuthorize("permitAll()")
     @GetMapping(path = "/exists-by-uniqueCode/{uniqueCode}")
-    public boolean existsByUniqueCode(@PathVariable String uniqueCode)
+    public boolean existsByUniqueCode(@PathVariable String uniqueCode, @RequestParam(defaultValue = "", required = false) String oldUniqueCode)
     {
-        return typeRepo.existsByUniqueCode(uniqueCode);
+        return typeService.existsByUniqueCode(uniqueCode, oldUniqueCode);
     }
 
     @GetMapping(path = "/exists-by-groupe-and-uniqueCode/{groupCode}/{uniqueCode}")

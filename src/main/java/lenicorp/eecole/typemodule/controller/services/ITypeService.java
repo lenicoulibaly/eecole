@@ -38,4 +38,6 @@ public interface ITypeService
     boolean existsByName(String name, String uniqueCode);
 
     boolean typeGroupIsValid(String typeGroup);
+
+    boolean existsByUniqueCode(String uniqueCode, String oldUniqueCode);
 }

@@ -21,12 +21,12 @@ public @interface ExistingOrNullPrivilegeId
     Class<? extends Payload> [] payload() default {};
 
     @Component @RequiredArgsConstructor
-    class ExistingOrNullPrivilegeIdValidator implements ConstraintValidator<ExistingOrNullPrivilegeId, Long>
+    class ExistingOrNullPrivilegeIdValidator implements ConstraintValidator<ExistingOrNullPrivilegeId, String>
     {
         private final PrvRepo prvRepo;
 
         @Override
-        public boolean isValid(Long value, ConstraintValidatorContext context) {
+        public boolean isValid(String value, ConstraintValidatorContext context) {
             return prvRepo.existsById(value) || value == null;
         }
     }

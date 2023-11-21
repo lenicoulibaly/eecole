@@ -1,9 +1,6 @@
 package lenicorp.eecole.moduleauth.controller.services.spec;
 
-import lenicorp.eecole.moduleauth.model.dtos.appprivilege.CreatePrivilegeDTO;
-import lenicorp.eecole.moduleauth.model.dtos.appprivilege.PrvByTypeDTO;
-import lenicorp.eecole.moduleauth.model.dtos.appprivilege.ReadPrvDTO;
-import lenicorp.eecole.moduleauth.model.dtos.appprivilege.SelectedPrvDTO;
+import lenicorp.eecole.moduleauth.model.dtos.appprivilege.*;
 import lenicorp.eecole.sharedmodule.dtos.SelectOption;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,4 +20,12 @@ public interface IPrivilegeService
     List<PrvByTypeDTO> getAllPrivlegesGroupesByType();
 
     List<SelectOption> getPrivilegeTypes();
+
+    boolean existsByName(String name, String privilegeCode);
+
+    boolean privilegeTypeIsValid(String typeCode);
+
+    ReadPrvDTO updatePrivilege(UpdatePrivilegeDTO dto) throws UnknownHostException;
+
+    List<SelectOption> getPrivilegesByTypes(List<String> typeCodes);
 }

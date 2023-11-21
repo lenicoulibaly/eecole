@@ -107,4 +107,7 @@ public interface TypeRepo extends JpaRepository<Type, String>
 
     @Query("select (count(t.uniqueCode)>0) from Type t where t.name = ?1 and t.uniqueCode <> ?2")
     boolean existsByName(String name, String uniqueCode);
+
+    @Query("select (count(t.uniqueCode)>0) from Type t where t.uniqueCode = ?1 and exists (select t1 from Type t1 where t1.uniqueCode = ?1 and t1.uniqueCode <> ?2)")
+    boolean existsByUniqueCode(String uniqueCode, String oldUniqueCode);
 }

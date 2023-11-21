@@ -8,6 +8,7 @@ public class ReadPrvDTO
     private String privilegeCode;
     private String privilegeName;
     private String prvTypeName;
+    private String typeCode;
     private Long clientId;
     private String clientName;
 

@@ -12,21 +12,21 @@ import java.lang.annotation.*;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {ExistingPrivilegeId.ExistingPrivilegeIdValidator.class})
+@Constraint(validatedBy = {ExistingPrivilegeCode.ExistingPrivilegeIdValidator.class})
 @Documented
-public @interface ExistingPrivilegeId
+public @interface ExistingPrivilegeCode
 {
     String message() default "Invalid privilegeId";
     Class<?> [] groups() default {};
     Class<? extends Payload> [] payload() default {};
 
     @Component @RequiredArgsConstructor
-    class ExistingPrivilegeIdValidator implements ConstraintValidator<ExistingPrivilegeId, Long>
+    class ExistingPrivilegeIdValidator implements ConstraintValidator<ExistingPrivilegeCode, String>
     {
         private final PrvRepo prvRepo;
 
         @Override
-        public boolean isValid(Long value, ConstraintValidatorContext context) {
+        public boolean isValid(String value, ConstraintValidatorContext context) {
             return prvRepo.existsById(value);
         }
     }

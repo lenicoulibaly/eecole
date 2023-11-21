@@ -47,4 +47,5 @@ public class AuthActions
     public static final String UPDATE_ROL = "Modification de rôle";
     public static final String SET_TOKEN_AS_ALREADY_USED = "Marquage d'un token comme déjà utilisé";
     public static final String UPDATE_FUNCTION = "Mise à jour des informations d'une fonction";
+    public static final String UPDATE_PRV = "Mise à jour d'un privilège";
 }
